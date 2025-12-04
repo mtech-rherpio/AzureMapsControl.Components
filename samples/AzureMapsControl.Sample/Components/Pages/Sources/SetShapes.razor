@@ -1,0 +1,207 @@
+@page "/Sources/SetShapes"
+@rendermode InteractiveServer
+
+@using AzureMapsControl.Components.Map
+@using AzureMapsControl.Components.Atlas
+
+<h3>DataSource SetShapes Demo</h3>
+<p>This page demonstrates the SetShapesAsync method which overwrites all data in a data source.</p>
+
+<div style="margin-bottom: 20px;">
+    <button class="btn btn-primary" @onclick="SetShapesWithPoints">Set Points (Shapes)</button>
+    <button class="btn btn-success" @onclick="SetShapesWithFeatures">Set Points (Features)</button>
+    <button class="btn btn-info" @onclick="SetShapesWithPolygons">Set Polygons</button>
+    <button class="btn btn-warning" @onclick="SetShapesWithLineStrings">Set LineStrings</button>
+    <button class="btn btn-secondary" @onclick="ClearDataSource">Clear DataSource</button>
+</div>
+
+<AzureMap Id="map"
+          CameraOptions="new CameraOptions { Center = new Position(0, 0), Zoom = 2 }"
+          EventActivationFlags="MapEventActivationFlags
+                                .None()
+                                .Enable(MapEventType.Ready)"
+          OnReady="OnMapReady" />
+
+<div style="margin-top: 20px;">
+    <p><strong>Current Data:</strong> @_currentDataType</p>
+    <p><strong>Count:</strong> @_currentCount</p>
+</div>
+
+@code {
+    private AzureMapsControl.Components.Data.DataSource? _dataSource;
+    private Map? _map;
+    private string _currentDataType = "None";
+    private int _currentCount = 0;
+
+    private async Task OnMapReady(MapEventArgs eventArgs)
+    {
+        _map = eventArgs.Map;
+
+        var dummyDataSourceId = "_empty";
+        var dummyDataSource = new AzureMapsControl.Components.Data.DataSource(dummyDataSourceId);
+        await eventArgs.Map.AddSourceAsync(dummyDataSource);
+
+        // Create and add data source
+        _dataSource = new AzureMapsControl.Components.Data.DataSource("setShapesDataSource");
+        await _map.AddSourceAsync(_dataSource);
+
+        // Add a symbol layer for points
+        var symbolLayer = new AzureMapsControl.Components.Layers.SymbolLayer
+        {
+            Options = new AzureMapsControl.Components.Layers.SymbolLayerOptions
+            {
+                Source = _dataSource.Id,
+                IconOptions = new AzureMapsControl.Components.Layers.IconOptions
+                {
+                    AllowOverlap = true,
+                    IgnorePlacement = true
+                }
+            }
+        };
+        await _map.AddLayerAsync(symbolLayer);
+
+        // Add a line layer for lines
+        var lineLayer = new AzureMapsControl.Components.Layers.LineLayer
+        {
+            Options = new AzureMapsControl.Components.Layers.LineLayerOptions
+            {
+                Source = _dataSource.Id,
+                StrokeColor = new ExpressionOrString("#FF0000"),
+                StrokeWidth = new ExpressionOrNumber(3)
+            }
+        };
+        await _map.AddLayerAsync(lineLayer);
+
+        // Add a polygon layer for polygons
+        var polygonLayer = new AzureMapsControl.Components.Layers.PolygonLayer
+        {
+            Options = new AzureMapsControl.Components.Layers.PolygonLayerOptions
+            {
+                Source = _dataSource.Id,
+                FillColor = new ExpressionOrString("#4CAF50"),
+                FillOpacity = new ExpressionOrNumber(0.5)
+            }
+        };
+        await _map.AddLayerAsync(polygonLayer);
+
+        // Don't add initial data here - let the user click a button instead
+        // This avoids race conditions with the data source being added to the map
+    }
+
+    private async Task SetShapesWithPoints()
+    {
+        if (_dataSource == null) return;
+
+        var shapes = new List<Shape>();
+        for (var i = 0; i < 10; i++)
+        {
+            var lon = (i * 10) - 45;
+            var lat = (i % 2 == 0) ? 20 : -20;
+            shapes.Add(new Shape<Point>(new Point(new Position(lon, lat))));
+        }
+
+        await _dataSource.SetShapesAsync(shapes);
+        
+        _currentDataType = "Points (Shapes)";
+        _currentCount = shapes.Count;
+        StateHasChanged();
+    }
+
+    private async Task SetShapesWithFeatures()
+    {
+        if (_dataSource == null) return;
+
+        var features = new List<Feature>();
+        for (var i = 0; i < 8; i++)
+        {
+            var lon = (i * 12) - 42;
+            var lat = (i % 2 == 0) ? 30 : -30;
+            var feature = new Feature<Point>(new Point(new Position(lon, lat)))
+            {
+                Properties = new Dictionary<string, object>
+                {
+                    { "name", $"Point {i + 1}" },
+                    { "value", i * 10 }
+                }
+            };
+            features.Add(feature);
+        }
+
+        await _dataSource.SetShapesAsync(features);
+        
+        _currentDataType = "Points (Features)";
+        _currentCount = features.Count;
+        StateHasChanged();
+    }
+
+    private async Task SetShapesWithPolygons()
+    {
+        if (_dataSource == null) return;
+
+        var shapes = new List<Shape>();
+        
+        // Create a few polygon shapes
+        for (var i = 0; i < 3; i++)
+        {
+            var baseLon = (i * 30) - 30;
+            var baseLat = 0;
+            
+            var positions = new List<Position>
+            {
+                new Position(baseLon, baseLat),
+                new Position(baseLon + 10, baseLat),
+                new Position(baseLon + 10, baseLat + 10),
+                new Position(baseLon, baseLat + 10),
+                new Position(baseLon, baseLat) // Close the polygon
+            };
+
+            shapes.Add(new Shape<Polygon>(new Polygon(new[] { positions })));
+        }
+
+        await _dataSource.SetShapesAsync(shapes);
+        
+        _currentDataType = "Polygons";
+        _currentCount = shapes.Count;
+        StateHasChanged();
+    }
+
+    private async Task SetShapesWithLineStrings()
+    {
+        if (_dataSource == null) return;
+
+        var shapes = new List<Shape>();
+        
+        // Create line strings
+        for (var i = 0; i < 5; i++)
+        {
+            var baseLat = (i * 15) - 30;
+            var positions = new List<Position>
+            {
+                new Position(-40, baseLat),
+                new Position(-20, baseLat + 5),
+                new Position(0, baseLat),
+                new Position(20, baseLat + 5),
+                new Position(40, baseLat)
+            };
+
+            shapes.Add(new Shape<LineString>(new LineString(positions)));
+        }
+
+        await _dataSource.SetShapesAsync(shapes);
+        
+        _currentDataType = "LineStrings";
+        _currentCount = shapes.Count;
+        StateHasChanged();
+    }
+
+    private async Task ClearDataSource()
+    {
+        if (_dataSource == null) return;
+
+        await _dataSource.ClearAsync();
+        
+        _currentDataType = "None";
+        _currentCount = 0;
+        StateHasChanged();
+    }
+}

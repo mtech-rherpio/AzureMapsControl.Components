@@ -105,4 +105,29 @@ export class Source {
         
         source.setOptions(options);
     }
+
+    public static setShapes(mapId: string, sourceId: string, shapes: Shape[]): void {
+        const map = Core.getMap(mapId);
+        const source = map.sources.getById(sourceId) as azmaps.source.DataSource;
+        
+        if (!source) {
+            throw new Error(`Data source with Id '${sourceId}' not found in map '${mapId}'.`);
+        }
+        
+        const mapsShapes = shapes.map(shape => GeometryBuilder.buildShape(shape));
+        
+        source.setShapes(mapsShapes);
+    }
+
+    public static setFeatures(mapId: string, sourceId: string, features: Feature[]): void {
+        const map = Core.getMap(mapId);
+        const source = map.sources.getById(sourceId) as azmaps.source.DataSource;
+        if (!source) {
+            throw new Error(`Data source with Id '${sourceId}' not found in map '${mapId}'.`);
+        }
+
+        const mapsFeatures = features.map(feature => GeometryBuilder.buildFeature(feature));
+        source.setShapes(mapsFeatures);
+    }
+
 }

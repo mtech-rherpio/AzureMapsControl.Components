@@ -409,6 +409,50 @@
             _features.AddRange(features);
         }
 
+        protected async ValueTask SetShapesAsync(IEnumerable<Shape> shapes)
+        {
+            EnsureJsRuntimeExists();
+            EnsureNotDisposed();
+            Logger?.LogAzureMapsControlDebug(AzureMapLogEvent.Source_SetShapesAsync, $"Id: {Id}");
+            
+            _shapes = new List<Shape>();
+            
+            if (shapes == null || !shapes.Any())
+            {
+                await JSRuntime.InvokeVoidAsync(Constants.JsConstants.Methods.Source.SetShapes.ToSourceNamespace(), MapId, Id, Array.Empty<Shape>());
+                return;
+            }
+
+            var allShapes = new List<object>();
+
+            allShapes.AddRange(shapes);
+
+            await JSRuntime.InvokeVoidAsync(Constants.JsConstants.Methods.Source.SetShapes.ToSourceNamespace(), MapId, Id, allShapes);
+            _shapes.AddRange(shapes);
+        }
+
+        protected async ValueTask SetFeaturesAsync(IEnumerable<Feature> features)
+        {
+            EnsureJsRuntimeExists();
+            EnsureNotDisposed();
+            Logger?.LogAzureMapsControlDebug(AzureMapLogEvent.Source_SetShapesAsync, $"Id: {Id}");
+            
+            _features = new List<Feature>();
+            
+            if (features == null || !features.Any())
+            {
+                await JSRuntime.InvokeVoidAsync(Constants.JsConstants.Methods.Source.SetFeatures.ToSourceNamespace(), MapId, Id, Array.Empty<Feature>());
+                return;
+            }
+
+            var allFeatures = new List<object>();
+            
+            allFeatures.AddRange(features);
+
+            await JSRuntime.InvokeVoidAsync(Constants.JsConstants.Methods.Source.SetFeatures.ToSourceNamespace(), MapId, Id, allFeatures);
+            _features.AddRange(features);
+        }
+
         protected void EnsureJsRuntimeExists()
         {
             if (JSRuntime is null)

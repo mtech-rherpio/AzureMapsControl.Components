@@ -106,6 +106,8 @@
                 internal const string GetOptions = "getOptions";
                 internal const string AddFeatureCollection = "addFeatureCollection";
                 internal const string SetOptions = "setOptions";
+                internal const string SetShapes = "setShapes";
+                internal const string SetFeatures = "setFeatures";
             }
 
             internal static class Datasource

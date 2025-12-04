@@ -68,6 +68,7 @@
         Source_DisposeAsync = 7004,
         Source_GetOptionsAsync = 7005,
         Source_SetOptionsAsync = 7006,
+        Source_SetShapesAsync = 7007,
         DataSource_GetShapesAsync = 7100,
         DataSource_GetClusterLeavesAsync = 7101,
         GriddedDataSource_GetCellChildren = 7200,

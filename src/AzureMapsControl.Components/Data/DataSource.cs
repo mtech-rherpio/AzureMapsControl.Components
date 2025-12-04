@@ -76,6 +76,50 @@
         public async ValueTask AddAsync(params Feature[] features) => await AddAsync(features as IEnumerable<Feature>);
 
         /// <summary>
+        /// Overwrites all shapes in the data source with the new array of shapes
+        /// </summary>
+        /// <param name="shapes">Shapes to set</param>
+        /// <returns></returns>
+        /// <exception cref="Exceptions.ComponentNotAddedToMapException">The control has not been added to the map</exception>
+        /// <exception cref="Exceptions.ComponentDisposedException">The control has already been disposed</exception>
+        public async ValueTask SetShapesAsync(IEnumerable<Shape> shapes)
+        {
+            Logger?.LogAzureMapsControlInfo(AzureMapLogEvent.Source_SetShapesAsync, "Setting shapes in data source");
+            await base.SetShapesAsync(shapes);
+        }
+
+        /// <summary>
+        /// Overwrites all shapes in the data source with the new array of shapes
+        /// </summary>
+        /// <param name="shapes">Shapes to set</param>
+        /// <returns></returns>
+        /// <exception cref="Exceptions.ComponentNotAddedToMapException">The control has not been added to the map</exception>
+        /// <exception cref="Exceptions.ComponentDisposedException">The control has already been disposed</exception>
+        public async ValueTask SetShapesAsync(params Shape[] shapes) => await SetShapesAsync(shapes as IEnumerable<Shape>);
+
+        /// <summary>
+        /// Overwrites all features in the data source with the new array of features
+        /// </summary>
+        /// <param name="features">Features to set</param>
+        /// <returns></returns>
+        /// <exception cref="Exceptions.ComponentNotAddedToMapException">The control has not been added to the map</exception>
+        /// <exception cref="Exceptions.ComponentDisposedException">The control has already been disposed</exception>
+        public async ValueTask SetShapesAsync(IEnumerable<Feature> features)
+        {
+            Logger?.LogAzureMapsControlInfo(AzureMapLogEvent.Source_SetShapesAsync, "Setting features in data source");
+            await SetFeaturesAsync(features);
+        }
+
+        /// <summary>
+        /// Overwrites all features in the data source with the new array of features
+        /// </summary>
+        /// <param name="features">Features to set</param>
+        /// <returns></returns>
+        /// <exception cref="Exceptions.ComponentNotAddedToMapException">The control has not been added to the map</exception>
+        /// <exception cref="Exceptions.ComponentDisposedException">The control has already been disposed</exception>
+        public async ValueTask SetShapesAsync(params Feature[] features) => await SetShapesAsync(features as IEnumerable<Feature>);
+
+        /// <summary>
         /// Returns all shapes that are in the DataSource.
         /// </summary>
         /// <returns>Shapes existing in the datasource</returns>
